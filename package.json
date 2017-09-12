@@ -1,0 +1,26 @@
+{
+  "name": "probot-commands",
+  "version": "1.0.0",
+  "description": "A Probot extension that adds slash commands to GitHub",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha && standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/probot/commands.git"
+  },
+  "author": "Brandon Keepers <bkeepers@github.com>",
+  "license": "ISC",
+  "homepage": "https://github.com/probot/commands",
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^3.4.1",
+    "standard": "^10.0.2"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  }
+}
