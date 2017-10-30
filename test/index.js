@@ -1,5 +1,4 @@
 const {EventEmitter} = require('events')
-const expect = require('expect')
 const commands = require('..')
 
 describe('commands', () => {
@@ -11,7 +10,7 @@ describe('commands', () => {
   }
 
   beforeEach(() => {
-    callback = expect.createSpy()
+    callback = jest.fn()
     robot = new EventEmitter()
     commands(robot, 'foo', callback)
   })
@@ -32,7 +31,7 @@ describe('commands', () => {
 
   it('does not call callback for other commands', () => {
     robot.emit('issue_comment.created', payload('hello world\n\n/nope nothing to see'))
-    expect(callback).toNotHaveBeenCalled()
+    expect(callback).not.toHaveBeenCalled()
   })
 
   it('invokes command on issue edit', () => {
@@ -41,6 +40,6 @@ describe('commands', () => {
     robot.emit('issue_comment.updated', event)
     robot.emit('issue_comment.deleted', event)
 
-    expect(callback).toNotHaveBeenCalled()
+    expect(callback).not.toHaveBeenCalled()
   })
 })
