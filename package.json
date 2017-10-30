@@ -4,7 +4,7 @@
   "description": "A Probot extension that adds slash commands to GitHub",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest && standard"
   },
   "repository": {
     "type": "git",

@@ -19,14 +19,14 @@ describe('commands', () => {
     robot.emit('issue_comment.created', payload('hello world\n\n/foo bar'))
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.calls[0].arguments[1]).toEqual({name: 'foo', arguments: 'bar'})
+    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: 'bar'})
   })
 
   it('invokes the command without arguments', () => {
     robot.emit('issue_comment.created', payload('hello world\n\n/foo'))
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.calls[0].arguments[1]).toEqual({name: 'foo', arguments: undefined})
+    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: undefined})
   })
 
   it('does not call callback for other commands', () => {
