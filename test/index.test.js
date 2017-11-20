@@ -34,6 +34,16 @@ describe('commands', () => {
     expect(callback).not.toHaveBeenCalled()
   })
 
+  it('does not call callback for superstring matches', () => {
+    robot.emit('issue_comment.created', payload('/foobar'))
+    expect(callback).not.toHaveBeenCalled()
+  })
+
+  it('does not call callback for substring matches', () => {
+    robot.emit('issue_comment.created', payload('/fo'))
+    expect(callback).not.toHaveBeenCalled()
+  })
+
   it('invokes command on issue edit', () => {
     const event = payload('hello world\n\n/foo bar')
     robot.emit('issue_comment', event)
