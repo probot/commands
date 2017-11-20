@@ -11,7 +11,7 @@ class Command {
   listener (context) {
     const command = context.payload.comment.body.match(this.matcher)
 
-    if (command && this.name.match(command[1])) {
+    if (command && this.name === command[1]) {
       return this.callback(context, {name: command[1], arguments: command[2]})
     }
   }
