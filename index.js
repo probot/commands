@@ -30,7 +30,7 @@ class Command {
  */
 module.exports = (robot, name, callback) => {
   const command = new Command(name, callback)
-  robot.on('issue_comment.created', command.listener.bind(command))
+  robot.on(['issue_comment.created', 'issue_comment.edited'], command.listener.bind(command))
 }
 
 module.exports.Command = Command
