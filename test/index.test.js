@@ -1,4 +1,4 @@
-const Command = require('.')
+const Command = require('..')
 
 describe('Commands', () => {
   let commands
