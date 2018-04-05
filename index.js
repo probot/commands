@@ -1,36 +1,45 @@
-class Command {
-  constructor (name, callback) {
+const compose = require('koa-compose')
+
+class Definition {
+  constructor ({name, description, usage, action, matches}) {
     this.name = name
-    this.callback = callback
-  }
+    this.description = description
+    this.usage = usage
+    this.action = action
 
-  get matcher () {
-    return /^\/([\w]+)\b *(.*)?$/m
-  }
-
-  listener (context) {
-    const command = context.payload.comment.body.match(this.matcher)
-
-    if (command && this.name === command[1]) {
-      return this.callback(context, {name: command[1], arguments: command[2]})
+    // Override matches function if one is provided
+    if (matches) {
+      this.matches = matches
     }
   }
+
+  matches (command) {
+    return this.name === command.name
+  }
+
+  handle (command, next) {
+    return this.matches(command) ? this.action(command, next) : next()
+  }
 }
 
-/**
- * Probot extension to abstract pattern for receiving slash commands in comments.
- *
- * @example
- *
- * // Type `/label foo, bar` in a comment box to add labels
- * commands(robot, 'label', (context, command) => {
- *   const labels = command.arguments.split(/, *\/);
- *   context.github.issues.addLabels(context.issue({labels}));
- * });
- */
-module.exports = (robot, name, callback) => {
-  const command = new Command(name, callback)
-  robot.on('issue_comment.created', command.listener.bind(command))
-}
+module.exports = class Command {
+  constructor () {
+    this.stack = []
+  }
 
-module.exports.Command = Command
+  use (middleware) {
+    this.stack.push({handle: middleware})
+  }
+
+  register (args) {
+    this.stack.push(new Definition(args))
+  }
+
+  get middleware () {
+    return compose(this.stack.map(command => command.handle.bind(command)))
+  }
+
+  invoke (command) {
+    return this.middleware(command)
+  }
+}

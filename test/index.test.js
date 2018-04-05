@@ -1,55 +1,96 @@
-const {EventEmitter} = require('events')
-const commands = require('..')
+const Command = require('..')
 
-describe('commands', () => {
-  let callback
-  let robot
-
-  function payload (text) {
-    return {payload: {comment: {body: text}}}
-  }
+describe('Commands', () => {
+  let commands
+  let testCommand
 
   beforeEach(() => {
-    callback = jest.fn()
-    robot = new EventEmitter()
-    commands(robot, 'foo', callback)
+    commands = new Command()
+
+    testCommand = {
+      name: 'test',
+      action: jest.fn()
+    }
   })
 
-  it('invokes callback and passes command logic', () => {
-    robot.emit('issue_comment.created', payload('hello world\n\n/foo bar'))
+  describe('use', () => {
+    test('calls middleware before command', async () => {
+      let called = false
+      commands.use((command, next) => {
+        called = true
+        return next()
+      })
+      commands.register(testCommand)
+      await commands.invoke({name: 'test'})
 
-    expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: 'bar'})
+      expect(called).toBe(true)
+    })
+
+    test('allows middlware to halt execution', async () => {
+      commands.use((command, next) => {
+        // does not call next()
+      })
+      commands.register(testCommand)
+      await commands.invoke({name: 'test'})
+
+      expect(testCommand.action).not.toHaveBeenCalled()
+    })
+
+    test('can catch errors', async () => {
+      commands.use(async (command, next) => {
+        try {
+          await next()
+        } catch (err) {
+          return 'rescued'
+        }
+      })
+      commands.register({
+        name: 'test',
+        action: () => {
+          throw new Error()
+        }
+      })
+
+      expect(await commands.invoke({name: 'test'})).toEqual('rescued')
+    })
   })
 
-  it('invokes the command without arguments', () => {
-    robot.emit('issue_comment.created', payload('hello world\n\n/foo'))
+  describe('invoke', () => {
+    test('calls command with args passed', async () => {
+      commands.register(testCommand)
+      const cmd = {name: 'test'}
+      await commands.invoke(cmd)
+      expect(testCommand.action).toHaveBeenCalledWith(cmd, expect.anything())
+    })
 
-    expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: undefined})
+    test('does not call command with different name', async () => {
+      commands.register(testCommand)
+      await commands.invoke({name: 'nope'})
+      expect(testCommand.action).not.toHaveBeenCalled()
+    })
+
+    test('returns response value from command', async () => {
+      commands.register(testCommand)
+      testCommand.action.mockReturnValue('hello world')
+      expect(await commands.invoke({name: 'test'})).toEqual('hello world')
+    })
   })
 
-  it('does not call callback for other commands', () => {
-    robot.emit('issue_comment.created', payload('hello world\n\n/nope nothing to see'))
-    expect(callback).not.toHaveBeenCalled()
-  })
+  describe('register', () => {
+    test('can define a custom matcher', async () => {
+      const action = jest.fn()
 
-  it('does not call callback for superstring matches', () => {
-    robot.emit('issue_comment.created', payload('/foobar'))
-    expect(callback).not.toHaveBeenCalled()
-  })
+      commands.register({
+        name: 'custom-matcher',
+        matches: (command) => command.args[0],
+        action
+      })
 
-  it('does not call callback for substring matches', () => {
-    robot.emit('issue_comment.created', payload('/fo'))
-    expect(callback).not.toHaveBeenCalled()
-  })
+      await commands.invoke({name: 'anything', args: [false]})
+      expect(action).not.toHaveBeenCalled()
 
-  it('invokes command on issue edit', () => {
-    const event = payload('hello world\n\n/foo bar')
-    robot.emit('issue_comment', event)
-    robot.emit('issue_comment.updated', event)
-    robot.emit('issue_comment.deleted', event)
-
-    expect(callback).not.toHaveBeenCalled()
+      await commands.invoke({name: 'anything', args: [true]})
+      expect(action).toHaveBeenCalled()
+    })
   })
 })
