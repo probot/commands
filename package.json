@@ -1,6 +1,6 @@
 {
   "name": "probot-commands",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A Probot extension that adds slash commands to GitHub",
   "main": "index.js",
   "scripts": {
