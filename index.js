@@ -9,7 +9,9 @@ class Command {
   }
 
   listener (context) {
-    const command = context.payload.comment.body.match(this.matcher)
+    const {comment, issue, pull_request} = context.payload
+
+    const command = (comment || issue || pull_request).body.match(this.matcher)
 
     if (command && this.name === command[1]) {
       return this.callback(context, {name: command[1], arguments: command[2]})
@@ -30,7 +32,8 @@ class Command {
  */
 module.exports = (robot, name, callback) => {
   const command = new Command(name, callback)
-  robot.on('issue_comment.created', command.listener.bind(command))
+  const events = ['issue_comment.created', 'issues.opened', 'pull_request.opened']
+  robot.on(events, command.listener.bind(command))
 }
 
 module.exports.Command = Command

@@ -92,4 +92,30 @@ describe('commands', () => {
 
     expect(callback).not.toHaveBeenCalled()
   })
+
+  it('invokes command on issues.opened', async () => {
+    await robot.receive({
+      event: 'issues',
+      payload: {
+        action: 'opened',
+        issue: {body: '/foo bar'}
+      }
+    })
+
+    expect(callback).toHaveBeenCalled()
+    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: 'bar'})
+  })
+
+  it('invokes command on pull_request.opened', async () => {
+    await robot.receive({
+      event: 'pull_request',
+      payload: {
+        action: 'opened',
+        issue: {body: '/foo bar'}
+      }
+    })
+
+    expect(callback).toHaveBeenCalled()
+    expect(callback.mock.calls[0][1]).toEqual({name: 'foo', arguments: 'bar'})
+  })
 })
