@@ -15,6 +15,7 @@
   "homepage": "https://github.com/probot/commands",
   "devDependencies": {
     "jest": "^21.2.1",
+    "probot": "^6.2.0",
     "standard": "^10.0.2"
   },
   "standard": {
