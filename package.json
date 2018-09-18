@@ -16,7 +16,7 @@
   "devDependencies": {
     "jest": "^23.6.0",
     "probot": "^6.2.0",
-    "standard": "^10.0.2"
+    "standard": "^12.0.1"
   },
   "standard": {
     "env": [
