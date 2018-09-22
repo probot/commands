@@ -118,4 +118,28 @@ describe('commands', () => {
     expect(callback).toHaveBeenCalled()
     expect(callback.mock.calls[0][1]).toEqual({ name: 'foo', arguments: 'bar' })
   })
+
+  it('ignores null pull_request.opened body', async () => {
+    await robot.receive({
+      event: 'pull_request',
+      payload: {
+        action: 'opened',
+        issue: { body: null }
+      }
+    })
+
+    expect(callback).not.toHaveBeenCalled()
+  })
+
+  it('ignores null issues.opened body', async () => {
+    await robot.receive({
+      event: 'issues',
+      payload: {
+        action: 'opened',
+        issue: { body: null }
+      }
+    })
+
+    expect(callback).not.toHaveBeenCalled()
+  })
 })
