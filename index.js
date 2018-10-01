@@ -5,7 +5,7 @@ class Command {
   }
 
   get matcher () {
-    return /^\/([\w]+)\b *(.*)?$/m
+    return this._matcher
   }
 
   listener (context) {
@@ -18,6 +18,8 @@ class Command {
     }
   }
 }
+
+Command.prototype._matcher = /^\/([\w]+)\b *(.*)?$/m
 
 /**
  * Probot extension to abstract pattern for receiving slash commands in comments.
@@ -37,3 +39,7 @@ module.exports = (robot, name, callback) => {
 }
 
 module.exports.Command = Command
+
+module.exports.setCommandFormat = (fmt) => {
+  Command.prototype._matcher = fmt
+}
