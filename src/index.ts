@@ -1,7 +1,7 @@
 import { Context, Application } from "probot";
 
-type Paramters = { name: string, arguments: string };
-type Callback = (context: Context, params: Paramters) => void;
+export type Paramters = { name: string, arguments: string };
+export type Callback = (context: Context, params: Paramters) => void;
 
 export class Command {
   name: string;

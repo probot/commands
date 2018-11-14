@@ -1,19 +1,24 @@
-const { createRobot } = require('probot')
-const commands = require('..')
+import { Probot, Application } from 'probot';
+import commands, {Callback} from '..';
 
 describe('commands', () => {
-  let callback
-  let robot
+  let callback: jest.Mock<{}>;
+  let probot: Probot;
 
   beforeEach(() => {
-    callback = jest.fn()
-    robot = createRobot({ app: jest.fn().mockReturnValue('test') })
-    commands(robot, 'foo', callback)
+    callback = jest.fn();
+    probot = new Probot({ id: 123, cert: 'test' })
+
+    const app = probot.load((app: Application) => {
+      commands(app, 'foo', callback as Callback)
+    })
+
+    app.app = () => 'test'
   })
 
   it('invokes callback and passes command logic', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'created',
         comment: { body: 'hello world\n\n/foo bar' }
@@ -25,8 +30,8 @@ describe('commands', () => {
   })
 
   it('invokes the command without arguments', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'created',
         comment: { body: 'hello world\n\n/foo' }
@@ -38,8 +43,8 @@ describe('commands', () => {
   })
 
   it('does not call callback for other commands', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'created',
         comment: { body: 'hello world\n\n/nope nothing to see' }
@@ -50,8 +55,8 @@ describe('commands', () => {
   })
 
   it('does not call callback for superstring matches', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'created',
         comment: { body: '/foobar' }
@@ -62,8 +67,8 @@ describe('commands', () => {
   })
 
   it('does not call callback for substring matches', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'created',
         comment: { body: '/fo' }
@@ -74,16 +79,16 @@ describe('commands', () => {
   })
 
   it('invokes command on issue edit', async () => {
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'updated',
         comment: { body: '/foo bar' }
       }
     })
 
-    await robot.receive({
-      event: 'issue_comment',
+    await probot.receive({
+      name: 'issue_comment',
       payload: {
         action: 'deleted',
         comment: { body: '/foo bar' }
@@ -94,8 +99,8 @@ describe('commands', () => {
   })
 
   it('invokes command on issues.opened', async () => {
-    await robot.receive({
-      event: 'issues',
+    await probot.receive({
+      name: 'issues',
       payload: {
         action: 'opened',
         issue: { body: '/foo bar' }
@@ -107,8 +112,8 @@ describe('commands', () => {
   })
 
   it('invokes command on pull_request.opened', async () => {
-    await robot.receive({
-      event: 'pull_request',
+    await probot.receive({
+      name: 'pull_request',
       payload: {
         action: 'opened',
         issue: { body: '/foo bar' }
