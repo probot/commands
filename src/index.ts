@@ -1,14 +1,22 @@
-class Command {
-  constructor (name, callback) {
+import { Context, Application } from "probot";
+
+type Paramters = { name: string, arguments: string };
+type Callback = (context: Context, params: Paramters) => void;
+
+export class Command {
+  name: string;
+  callback: Callback;
+
+  constructor(name: string, callback: Callback) {
     this.name = name
     this.callback = callback
   }
 
-  get matcher () {
+  get matcher() {
     return /^\/([\w]+)\b *(.*)?$/m
   }
 
-  listener (context) {
+  listener(context: Context) {
     const { comment, issue, pull_request: pr } = context.payload
 
     const command = (comment || issue || pr).body.match(this.matcher)
@@ -30,10 +38,8 @@ class Command {
  *   context.github.issues.addLabels(context.issue({labels}));
  * });
  */
-module.exports = (robot, name, callback) => {
+export default (app: Application, name: string, callback: Callback) => {
   const command = new Command(name, callback)
   const events = ['issue_comment.created', 'issues.opened', 'pull_request.opened']
-  robot.on(events, command.listener.bind(command))
+  app.on(events, command.listener.bind(command))
 }
-
-module.exports.Command = Command
