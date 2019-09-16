@@ -5,7 +5,7 @@ class Command {
   }
 
   get matcher () {
-    return /^\/([\w]+)\b *(.*)?$/m
+    return /^\/([\w-]+)\b *(.*)?$/m
   }
 
   listener (context) {

@@ -1,14 +1,14 @@
 const { createRobot } = require('probot')
 const commands = require('..')
 
-describe('commands', () => {
+function runCommandTests (commandName) {
   let callback
   let robot
 
   beforeEach(() => {
     callback = jest.fn()
     robot = createRobot({ app: jest.fn().mockReturnValue('test') })
-    commands(robot, 'foo', callback)
+    commands(robot, commandName, callback)
   })
 
   it('invokes callback and passes command logic', async () => {
@@ -16,12 +16,12 @@ describe('commands', () => {
       event: 'issue_comment',
       payload: {
         action: 'created',
-        comment: { body: 'hello world\n\n/foo bar' }
+        comment: { body: `hello world\n\n/${commandName} bar` }
       }
     })
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({ name: 'foo', arguments: 'bar' })
+    expect(callback.mock.calls[0][1]).toEqual({ name: commandName, arguments: 'bar' })
   })
 
   it('invokes the command without arguments', async () => {
@@ -29,12 +29,12 @@ describe('commands', () => {
       event: 'issue_comment',
       payload: {
         action: 'created',
-        comment: { body: 'hello world\n\n/foo' }
+        comment: { body: `hello world\n\n/${commandName}` }
       }
     })
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({ name: 'foo', arguments: undefined })
+    expect(callback.mock.calls[0][1]).toEqual({ name: commandName, arguments: undefined })
   })
 
   it('does not call callback for other commands', async () => {
@@ -54,7 +54,7 @@ describe('commands', () => {
       event: 'issue_comment',
       payload: {
         action: 'created',
-        comment: { body: '/foobar' }
+        comment: { body: `/${commandName}bar` }
       }
     })
 
@@ -78,7 +78,7 @@ describe('commands', () => {
       event: 'issue_comment',
       payload: {
         action: 'updated',
-        comment: { body: '/foo bar' }
+        comment: { body: `/${commandName} bar` }
       }
     })
 
@@ -86,7 +86,7 @@ describe('commands', () => {
       event: 'issue_comment',
       payload: {
         action: 'deleted',
-        comment: { body: '/foo bar' }
+        comment: { body: `/${commandName} bar` }
       }
     })
 
@@ -98,12 +98,12 @@ describe('commands', () => {
       event: 'issues',
       payload: {
         action: 'opened',
-        issue: { body: '/foo bar' }
+        issue: { body: `/${commandName} bar` }
       }
     })
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({ name: 'foo', arguments: 'bar' })
+    expect(callback.mock.calls[0][1]).toEqual({ name: commandName, arguments: 'bar' })
   })
 
   it('invokes command on pull_request.opened', async () => {
@@ -111,11 +111,19 @@ describe('commands', () => {
       event: 'pull_request',
       payload: {
         action: 'opened',
-        issue: { body: '/foo bar' }
+        issue: { body: `/${commandName} bar` }
       }
     })
 
     expect(callback).toHaveBeenCalled()
-    expect(callback.mock.calls[0][1]).toEqual({ name: 'foo', arguments: 'bar' })
+    expect(callback.mock.calls[0][1]).toEqual({ name: commandName, arguments: 'bar' })
   })
+}
+
+describe('commands', () => {
+  runCommandTests('foo')
+})
+
+describe('commands with hyphen', () => {
+  runCommandTests('foo-bar')
 })
