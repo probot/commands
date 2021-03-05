@@ -6,13 +6,9 @@
   "scripts": {
     "test": "jest && standard"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/probot/commands.git"
-  },
+  "repository": "github:probot/commands",
   "author": "Brandon Keepers <bkeepers@github.com>",
   "license": "ISC",
-  "homepage": "https://github.com/probot/commands",
   "devDependencies": {
     "jest": "^23.6.0",
     "probot": "^6.2.0",
