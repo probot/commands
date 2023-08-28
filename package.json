@@ -10,7 +10,7 @@
   "author": "Brandon Keepers <bkeepers@github.com>",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^23.6.0",
+    "jest": "^29.0.0",
     "probot": "^6.2.0",
     "standard": "^12.0.1"
   },
